@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline UPI Bluetooth Relay Simulator | Secure Financial Protocol</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #090d16;
+            --bg-card: rgba(18, 26, 43, 0.75);
+            --bg-card-hover: rgba(26, 38, 64, 0.85);
+            --border: rgba(255, 255, 255, 0.08);
+            --border-glow: rgba(0, 229, 255, 0.3);
+            
+            --cyan: #00e5ff;
+            --cyan-glow: rgba(0, 229, 255, 0.25);
+            --emerald: #00e676;
+            --emerald-glow: rgba(0, 230, 118, 0.2);
+            --amber: #ffab00;
+            --amber-glow: rgba(255, 171, 0, 0.2);
+            --rose: #ff1744;
+            --rose-glow: rgba(255, 23, 68, 0.2);
+            --purple: #d500f9;
+            
+            --text-main: #f1f5f9;
+            --text-sub: #94a3b8;
+            --text-dim: #64748b;
+            
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 229, 255, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(213, 0, 249, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(0, 230, 118, 0.03) 0%, transparent 60%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            line-height: 1.5;
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto 24px auto;
+            padding: 20px 28px;
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 0 20px var(--cyan-glow);
+        }
+
+        .header-title h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffffff, var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .header-title p {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+        }
+
+        .system-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 230, 118, 0.1);
+            border: 1px solid rgba(0, 230, 118, 0.3);
+            color: var(--emerald);
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--emerald);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--emerald);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-header h2 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--text-sub);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control, select {
+            width: 100%;
+            padding: 12px 14px;
+            background: rgba(10, 15, 26, 0.8);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus, select:focus {
+            outline: none;
+            border-color: var(--cyan);
+            box-shadow: 0 0 12px var(--cyan-glow);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 12px 20px;
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: var(--font-sans);
+            font-size: 0.92rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00b0ff, #00e5ff);
+            color: #040914;
+            box-shadow: 0 4px 16px var(--cyan-glow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 229, 255, 0.4);
+        }
+
+        .btn-purple {
+            background: linear-gradient(135deg, #aa00ff, #d500f9);
+            color: #ffffff;
+            box-shadow: 0 4px 16px rgba(213, 0, 249, 0.3);
+        }
+
+        .btn-purple:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(213, 0, 249, 0.5);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ff8f00, #ffab00);
+            color: #040914;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #d50000, #ff1744);
+            color: #ffffff;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--text-sub);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .code-box {
+            background: #060911;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: var(--radius-md);
+            padding: 12px 14px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: #a5f3fc;
+            word-break: break-all;
+            max-height: 120px;
+            overflow-y: auto;
+            margin-top: 6px;
+        }
+
+        .relay-nodes-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-top: 14px;
+        }
+
+        .relay-card {
+            background: rgba(10, 15, 26, 0.6);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .relay-card.active {
+            border-color: var(--cyan);
+            background: rgba(0, 229, 255, 0.05);
+        }
+
+        .relay-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .account-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .acc-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .acc-user {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-main);
+        }
+
+        .acc-upi {
+            font-size: 0.8rem;
+            color: var(--cyan);
+            font-family: var(--font-mono);
+        }
+
+        .acc-balance {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--emerald);
+            margin-top: 10px;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        th, td {
+            padding: 12px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: rgba(10, 15, 26, 0.9);
+            color: var(--text-sub);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.75rem;
+        }
+
+        tbody tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(0, 230, 118, 0.15);
+            color: var(--emerald);
+            border: 1px solid rgba(0, 230, 118, 0.3);
+        }
+
+        .badge-warning {
+            background: rgba(255, 171, 0, 0.15);
+            color: var(--amber);
+            border: 1px solid rgba(255, 171, 0, 0.3);
+        }
+
+        .badge-danger {
+            background: rgba(255, 23, 68, 0.15);
+            color: var(--rose);
+            border: 1px solid rgba(255, 23, 68, 0.3);
+        }
+
+        .verification-pipeline {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .v-step {
+            background: rgba(10, 15, 26, 0.7);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            text-align: center;
+        }
+
+        .v-step-num {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        .v-step-title {
+            font-size: 0.88rem;
+            font-weight: 600;
+            margin: 6px 0;
+        }
+
+        .v-status {
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        .v-status.ok { color: var(--emerald); }
+        .v-status.fail { color: var(--rose); }
+        .v-status.warn { color: var(--amber); }
+
+        .log-terminal {
+            background: #03060c;
+            border: 1px solid rgba(0, 229, 255, 0.15);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: #e2e8f0;
+            height: 180px;
+            overflow-y: auto;
+            margin-top: 14px;
+        }
+
+        .log-entry {
+            margin-bottom: 4px;
+        }
+
+        .log-time { color: var(--text-dim); }
+        .log-info { color: var(--cyan); }
+        .log-success { color: var(--emerald); }
+        .log-warn { color: var(--amber); }
+        .log-error { color: var(--rose); }
+
+        @media (max-width: 900px) {
+            .grid-layout { grid-template-columns: 1fr; }
+            .full-width { grid-column: span 1; }
+            .relay-nodes-grid, .account-cards, .verification-pipeline { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="header-title">
+            <div class="logo-icon">⚡</div>
+            <div>
+                <h1>Offline UPI Bluetooth Relay Protocol</h1>
+                <p>Secure Peer-to-Peer Relay Architecture with RSA Encryption, Deduplication & TTL Expiration</p>
+            </div>
+        </div>
+        <div class="system-badge">
+            <div class="status-dot"></div>
+            <span>Bank Server Online (Port 8081)</span>
+        </div>
+    </header>
+
+    <!-- Main Grid -->
+    <div class="grid-layout">
+
+        <!-- Panel 1: Offline Sender Mobile Device -->
+        <div class="card">
+            <div class="card-header">
+                <h2>📱 Sender Phone (No Internet)</h2>
+                <span class="badge badge-warning">Offline Mode</span>
+            </div>
+
+            <div class="form-group">
+                <label>Sender Account (UPI ID)</label>
+                <select id="senderUpi" onchange="generateKeysIfMissing()">
+                    <option value="alice@upi">Alice (alice@upi) - Balance: ₹5000</option>
+                    <option value="bob@upi">Bob (bob@upi) - Balance: ₹1000</option>
+                    <option value="merchant@upi">Store (merchant@upi) - Balance: ₹500</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Recipient UPI ID</label>
+                <select id="receiverUpi">
+                    <option value="bob@upi">Bob (bob@upi)</option>
+                    <option value="merchant@upi">SuperMart Store (merchant@upi)</option>
+                    <option value="alice@upi">Alice (alice@upi)</option>
+                </select>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="form-group">
+                    <label>Amount (₹)</label>
+                    <input type="number" id="transferAmount" class="form-control" value="250" min="1" max="10000">
+                </div>
+                <div class="form-group">
+                    <label>TTL Expiration (Sec)</label>
+                    <input type="number" id="ttlInput" class="form-control" value="300">
+                </div>
+            </div>
+
+            <div style="margin-bottom: 14px;">
+                <button class="btn btn-primary" onclick="generateSignedPayload()">
+                    🔐 Encrypt & Sign Payload (RSA-256)
+                </button>
+            </div>
+
+            <div class="form-group">
+                <label>Generated Nonce (Transaction UUID)</label>
+                <div id="nonceDisplay" class="code-box" style="height: 36px; padding: 6px 12px;">Click Encrypt to generate</div>
+            </div>
+
+            <div class="form-group">
+                <label>RSA Digital Signature (SHA256withRSA)</label>
+                <div id="sigDisplay" class="code-box">Sign payload to view digital signature</div>
+            </div>
+
+            <button class="btn btn-purple" id="btnBroadcast" onclick="broadcastBluetooth()" disabled>
+                📡 Broadcast via Bluetooth Mesh to Nearby Peers
+            </button>
+        </div>
+
+        <!-- Panel 2: Bluetooth Mesh Relay Nodes -->
+        <div class="card">
+            <div class="card-header">
+                <h2>📶 Bluetooth Mesh Relay Forwarders</h2>
+                <span class="badge badge-success">3 Nearby Peers Found</span>
+            </div>
+
+            <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 12px;">
+                The sender has no internet. When broadcasted, nearby peer devices receive the encrypted payload via Bluetooth and forward it to the Bank Server when they have network.
+            </p>
+
+            <div class="relay-nodes-grid">
+                <div class="relay-card" id="relayCardA">
+                    <div class="relay-icon">☕</div>
+                    <strong style="font-size: 0.88rem; display: block;">Peer Node A</strong>
+                    <span style="font-size: 0.72rem; color: var(--text-dim);">Coffee Shop (Online)</span>
+                    <button class="btn btn-outline" style="margin-top: 10px; padding: 6px; font-size: 0.75rem;" onclick="forwardRelay('PeerNode-A')" id="btnForwardA" disabled>
+                        Forward Node A
+                    </button>
+                </div>
+
+                <div class="relay-card" id="relayCardB">
+                    <div class="relay-icon">🚌</div>
+                    <strong style="font-size: 0.88rem; display: block;">Peer Node B</strong>
+                    <span style="font-size: 0.72rem; color: var(--text-dim);">Bus Stop (Online)</span>
+                    <button class="btn btn-outline" style="margin-top: 10px; padding: 6px; font-size: 0.75rem;" onclick="forwardRelay('PeerNode-B')" id="btnForwardB" disabled>
+                        Forward Node B
+                    </button>
+                </div>
+
+                <div class="relay-card" id="relayCardC">
+                    <div class="relay-icon">🚇</div>
+                    <strong style="font-size: 0.88rem; display: block;">Peer Node C</strong>
+                    <span style="font-size: 0.72rem; color: var(--text-dim);">Metro Stn (Online)</span>
+                    <button class="btn btn-outline" style="margin-top: 10px; padding: 6px; font-size: 0.75rem;" onclick="forwardRelay('PeerNode-C')" id="btnForwardC" disabled>
+                        Forward Node C
+                    </button>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border);">
+                <button class="btn btn-warning" onclick="simulateMultiPeerForwarding()" id="btnSimulateAll" disabled>
+                    ⚡ SIMULATE ALL 3 PEERS FORWARDING SIMULTANEOUSLY (Test Problem #2 Deduplication)
+                </button>
+            </div>
+
+            <div style="margin-top: 14px;" class="btn-group">
+                <button class="btn btn-outline" onclick="testExpiredTtl()">
+                    🧪 Test Expired TTL
+                </button>
+                <button class="btn btn-outline" onclick="testTamperedSignature()">
+                    🧪 Test Tampered Signature
+                </button>
+            </div>
+        </div>
+
+        <!-- Panel 3: Bank Security & Verification Pipeline Inspector -->
+        <div class="card full-width">
+            <div class="card-header">
+                <h2>🏦 Bank Server Real-time Verification & Deduplication Pipeline</h2>
+                <span class="badge badge-success">Automated Ledger Settlement</span>
+            </div>
+
+            <div class="verification-pipeline">
+                <div class="v-step">
+                    <div class="v-step-num">Step 1</div>
+                    <div class="v-step-title">🔐 Encryption & RSA Sig</div>
+                    <div class="v-status ok" id="vStep1">Awaiting Broadcast</div>
+                </div>
+
+                <div class="v-step">
+                    <div class="v-step-num">Step 2</div>
+                    <div class="v-step-title">⏳ TTL Clock Check</div>
+                    <div class="v-status ok" id="vStep2">Awaiting Broadcast</div>
+                </div>
+
+                <div class="v-step">
+                    <div class="v-step-num">Step 3</div>
+                    <div class="v-step-title">🛡️ Deduplication Lock</div>
+                    <div class="v-status ok" id="vStep3">Awaiting Broadcast</div>
+                </div>
+
+                <div class="v-step">
+                    <div class="v-step-num">Step 4</div>
+                    <div class="v-step-title">💸 Ledger Settlement</div>
+                    <div class="v-status ok" id="vStep4">Awaiting Broadcast</div>
+                </div>
+            </div>
+
+            <div class="log-terminal" id="logTerminal">
+                <div class="log-entry"><span class="log-time">[System]</span> <span class="log-info">Offline UPI Bluetooth Relay Server Inspector ready on port 8081...</span></div>
+            </div>
+        </div>
+
+        <!-- Panel 4: Live Accounts & Audit Ledger -->
+        <div class="card full-width">
+            <div class="card-header">
+                <h2>📊 Live Bank Accounts & Transaction Audit Ledger</h2>
+                <button class="btn btn-outline" style="width: auto; padding: 6px 14px; font-size: 0.8rem;" onclick="loadBalancesAndHistory()">
+                    🔄 Refresh Data
+                </button>
+            </div>
+
+            <div class="account-cards">
+                <div class="acc-card">
+                    <div>
+                        <div class="acc-user">Alice Sharma</div>
+                        <div class="acc-upi">alice@upi</div>
+                    </div>
+                    <div class="acc-balance" id="accBalAlice">₹5000.00</div>
+                </div>
+
+                <div class="acc-card">
+                    <div>
+                        <div class="acc-user">Bob Kumar</div>
+                        <div class="acc-upi">bob@upi</div>
+                    </div>
+                    <div class="acc-balance" id="accBalBob">₹1000.00</div>
+                </div>
+
+                <div class="acc-card">
+                    <div>
+                        <div class="acc-user">SuperMart Store</div>
+                        <div class="acc-upi">merchant@upi</div>
+                    </div>
+                    <div class="acc-balance" id="accBalMerchant">₹500.00</div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nonce / Transaction ID</th>
+                            <th>Sender</th>
+                            <th>Receiver</th>
+                            <th>Amount</th>
+                            <th>Relay Forwarder</th>
+                            <th>Status</th>
+                            <th>Deduplicated Ignores</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ledgerTableBody">
+                        <tr>
+                            <td colspan="8" style="text-align: center; color: var(--text-dim); padding: 20px;">No transactions recorded yet. Execute an offline transaction above!</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Client Script for RSA Signing & Server API Integration -->
+    <script>
+        let currentKeyPair = null;
+        let currentPayload = null;
+
+        // Initialize Web Crypto RSA Keypair in browser
+        async function initCryptoKeys() {
+            try {
+                currentKeyPair = await window.crypto.subtle.generateKey(
+                    {
+                        name: "RSASSA-PKCS1-v1_5",
+                        modulusLength: 2048,
+                        publicExponent: new Uint8Array([1, 0, 1]),
+                        hash: "SHA-256"
+                    },
+                    true,
+                    ["sign", "verify"]
+                );
+                log("info", "Browser RSA-2048 KeyPair successfully generated for offline signing.");
+            } catch (err) {
+                console.error("Crypto init error:", err);
+            }
+        }
+
+        function arrayBufferToBase64(buffer) {
+            let binary = '';
+            let bytes = new Uint8Array(buffer);
+            let len = bytes.byteLength;
+            for (let i = 0; i < len; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return window.btoa(binary);
+        }
+
+        async function exportPublicKeyPem(key) {
+            const exported = await window.crypto.subtle.exportKey("spki", key);
+            return arrayBufferToBase64(exported);
+        }
+
+        async function generateSignedPayload() {
+            if (!currentKeyPair) {
+                await initCryptoKeys();
+            }
+
+            const senderUpi = document.getElementById("senderUpi").value;
+            const receiverUpi = document.getElementById("receiverUpi").value;
+            const amount = parseFloat(document.getElementById("transferAmount").value);
+            const ttlSeconds = parseInt(document.getElementById("ttlInput").value);
+            const timestamp = Date.now();
+            const nonce = 'tx-' + Math.random().toString(36).substring(2, 10) + '-' + Date.now().toString(36);
+
+            if (senderUpi === receiverUpi) {
+                alert("Sender and Receiver UPI ID cannot be the same!");
+                return;
+            }
+
+            // Standard payload string signed by sender
+            const rawData = `${senderUpi}|${receiverUpi}|${amount}|${nonce}|${timestamp}`;
+
+            // Sign using RSA-SHA256
+            const encoder = new TextEncoder();
+            const signatureBuffer = await window.crypto.subtle.sign(
+                "RSASSA-PKCS1-v1_5",
+                currentKeyPair.privateKey,
+                encoder.encode(rawData)
+            );
+
+            const signatureBase64 = arrayBufferToBase64(signatureBuffer);
+            const publicKeyBase64 = await exportPublicKeyPem(currentKeyPair.publicKey);
+
+            currentPayload = {
+                senderUpiId: senderUpi,
+                receiverUpiId: receiverUpi,
+                amount: amount,
+                nonce: nonce,
+                timestamp: timestamp,
+                ttlSeconds: ttlSeconds,
+                signature: signatureBase64,
+                publicKey: publicKeyBase64,
+                encryptedPayload: window.btoa(JSON.stringify({ rawData, security: "AES-GCM-MOCK" }))
+            };
+
+            document.getElementById("nonceDisplay").innerText = nonce;
+            document.getElementById("sigDisplay").innerText = signatureBase64;
+            document.getElementById("btnBroadcast").disabled = false;
+
+            log("success", `Offline payload created & signed! Nonce: ${nonce}, Amount: ₹${amount}`);
+        }
+
+        function broadcastBluetooth() {
+            if (!currentPayload) return;
+            log("info", `📡 Broadcasting encrypted payload via Bluetooth... (Recipient: ${currentPayload.receiverUpiId})`);
+            
+            document.getElementById("relayCardA").classList.add("active");
+            document.getElementById("relayCardB").classList.add("active");
+            document.getElementById("relayCardC").classList.add("active");
+
+            document.getElementById("btnForwardA").disabled = false;
+            document.getElementById("btnForwardB").disabled = false;
+            document.getElementById("btnForwardC").disabled = false;
+            document.getElementById("btnSimulateAll").disabled = false;
+
+            document.getElementById("vStep1").className = "v-status ok";
+            document.getElementById("vStep1").innerText = "RSA Signature OK";
+            document.getElementById("vStep2").className = "v-status ok";
+            document.getElementById("vStep2").innerText = "TTL Valid (" + currentPayload.ttlSeconds + "s)";
+            document.getElementById("vStep3").className = "v-status warn";
+            document.getElementById("vStep3").innerText = "Awaiting Bank Relay";
+        }
+
+        async function forwardRelay(relayNodeId) {
+            if (!currentPayload) {
+                alert("Please generate and broadcast a payload first!");
+                return;
+            }
+
+            const payloadToSend = { ...currentPayload, relayNodeId: relayNodeId };
+
+            log("info", `Forwarding payload to Bank Server via [${relayNodeId}]...`);
+
+            try {
+                const res = await fetch("/payment/relay-send", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payloadToSend)
+                });
+
+                const data = await res.json();
+                handleBankResponse(data, relayNodeId);
+                loadBalancesAndHistory();
+            } catch (err) {
+                log("error", "Error connecting to Bank Server: " + err.message);
+            }
+        }
+
+        async function simulateMultiPeerForwarding() {
+            if (!currentPayload) return;
+
+            log("warn", "⚡ Simulating Problem #2: Peer A, Peer B, Peer C all forwarding the Bluetooth broadcast simultaneously!");
+
+            // Send requests from Node A, Node B, and Node C
+            const reqA = forwardRelay("PeerNode-A");
+            const reqB = forwardRelay("PeerNode-B");
+            const reqC = forwardRelay("PeerNode-C");
+
+            await Promise.all([reqA, reqB, reqC]);
+        }
+
+        async function testExpiredTtl() {
+            if (!currentPayload) {
+                await generateSignedPayload();
+            }
+            const expiredPayload = { ...currentPayload, timestamp: Date.now() - 600000, ttlSeconds: 300, relayNodeId: "Malicious-Peer" };
+            log("error", "🧪 Sending expired transaction payload (Created 10 mins ago, TTL = 300s)...");
+
+            try {
+                const res = await fetch("/payment/relay-send", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(expiredPayload)
+                });
+                const data = await res.json();
+                handleBankResponse(data, "Malicious-Peer");
+                loadBalancesAndHistory();
+            } catch (err) {
+                log("error", err.message);
+            }
+        }
+
+        async function testTamperedSignature() {
+            if (!currentPayload) {
+                await generateSignedPayload();
+            }
+            const tamperedPayload = { ...currentPayload, amount: 9999.00, relayNodeId: "Eavesdropper-Peer" };
+            log("error", "🧪 Sending tampered transaction payload (Amount altered to ₹9999 without valid signature update)...");
+
+            try {
+                const res = await fetch("/payment/relay-send", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(tamperedPayload)
+                });
+                const data = await res.json();
+                handleBankResponse(data, "Eavesdropper-Peer");
+                loadBalancesAndHistory();
+            } catch (err) {
+                log("error", err.message);
+            }
+        }
+
+        function handleBankResponse(data, relayNodeId) {
+            if (data.status === "SUCCESS") {
+                log("success", `✅ [BANK SETTLED] ${data.message} (Sender Bal: ₹${data.senderBalance}, Receiver Bal: ₹${data.receiverBalance})`);
+                document.getElementById("vStep3").className = "v-status ok";
+                document.getElementById("vStep3").innerText = "Locked (Processed)";
+                document.getElementById("vStep4").className = "v-status ok";
+                document.getElementById("vStep4").innerText = "₹" + data.amount + " Settled";
+            } else if (data.status === "DUPLICATE_IGNORED") {
+                log("warn", `🛡️ [DEDUPLICATED] ${data.message}`);
+                document.getElementById("vStep3").className = "v-status warn";
+                document.getElementById("vStep3").innerText = "Duplicate Detected";
+            } else if (data.status === "EXPIRED") {
+                log("error", `❌ [BANK REJECTED] ${data.message}`);
+                document.getElementById("vStep2").className = "v-status fail";
+                document.getElementById("vStep2").innerText = "Expired (Rejected)";
+            } else if (data.status === "INVALID_SIGNATURE") {
+                log("error", `❌ [SECURITY ALERT] ${data.message}`);
+                document.getElementById("vStep1").className = "v-status fail";
+                document.getElementById("vStep1").innerText = "Tampered Signature!";
+            } else {
+                log("error", `❌ [BANK REJECTED] Status: ${data.status} - ${data.message}`);
+            }
+        }
+
+        async function loadBalancesAndHistory() {
+            try {
+                const [accRes, payRes] = await Promise.all([
+                    fetch("/payment/accounts"),
+                    fetch("/payment/history")
+                ]);
+
+                const accounts = await accRes.json();
+                const payments = await payRes.json();
+
+                // Update Balances
+                accounts.forEach(acc => {
+                    if (acc.user && acc.user.upiId === "alice@upi") {
+                        document.getElementById("accBalAlice").innerText = "₹" + acc.balance.toFixed(2);
+                    } else if (acc.user && acc.user.upiId === "bob@upi") {
+                        document.getElementById("accBalBob").innerText = "₹" + acc.balance.toFixed(2);
+                    } else if (acc.user && acc.user.upiId === "merchant@upi") {
+                        document.getElementById("accBalMerchant").innerText = "₹" + acc.balance.toFixed(2);
+                    }
+                });
+
+                // Update Table
+                const tbody = document.getElementById("ledgerTableBody");
+                if (payments.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-dim); padding: 20px;">No transactions recorded yet. Execute an offline transaction above!</td></tr>`;
+                    return;
+                }
+
+                let html = '';
+                payments.slice().reverse().forEach(p => {
+                    let badgeClass = 'badge-success';
+                    if (p.status === 'DUPLICATE_IGNORED') badgeClass = 'badge-warning';
+                    if (p.status === 'EXPIRED' || p.status === 'INVALID_SIGNATURE' || p.status === 'INSUFFICIENT_FUNDS') badgeClass = 'badge-danger';
+
+                    const timeStr = p.createdAt ? p.createdAt.replace('T', ' ').substring(0, 19) : new Date().toLocaleTimeString();
+
+                    html += `
+                        <tr>
+                            <td style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--cyan);">${p.nonce || ('tx-' + p.id)}</td>
+                            <td>${p.senderUpiId || ('ID:' + p.senderId)}</td>
+                            <td>${p.receiverUpiId || ('ID:' + p.receiverId)}</td>
+                            <strong style="color: var(--text-main);">₹${p.amount}</strong>
+                            <td><span style="font-family: var(--font-mono); font-size: 0.78rem;">${p.relayNodeId || 'Direct'}</span></td>
+                            <td><span class="badge ${badgeClass}">${p.status}</span></td>
+                            <td style="text-align: center; font-weight: 600;">${p.deduplicatedCount || 0}</td>
+                            <td style="color: var(--text-dim); font-size: 0.78rem;">${timeStr}</td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+
+            } catch (err) {
+                console.error("Error loading history:", err);
+            }
+        }
+
+        function log(type, msg) {
+            const term = document.getElementById("logTerminal");
+            const time = new Date().toLocaleTimeString();
+            let cls = 'log-info';
+            if (type === 'success') cls = 'log-success';
+            if (type === 'warn') cls = 'log-warn';
+            if (type === 'error') cls = 'log-error';
+
+            const div = document.createElement("div");
+            div.className = "log-entry";
+            div.innerHTML = `<span class="log-time">[${time}]</span> <span class="${cls}">${msg}</span>`;
+            term.appendChild(div);
+            term.scrollTop = term.scrollHeight;
+        }
+
+        function generateKeysIfMissing() {
+            currentPayload = null;
+            document.getElementById("nonceDisplay").innerText = "Click Encrypt to generate";
+            document.getElementById("sigDisplay").innerText = "Sign payload to view digital signature";
+            document.getElementById("btnBroadcast").disabled = true;
+        }
+
+        // Initialize on page load
+        window.onload = async () => {
+            await initCryptoKeys();
+            loadBalancesAndHistory();
+        };
+    </script>
+</body>
+</html>
