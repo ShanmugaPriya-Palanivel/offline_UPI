@@ -123,16 +123,24 @@ public class PaymentService {
         }
 
         if (request.getSignature() != null && !request.getSignature().isEmpty()) {
-            String payloadData = (request.getSenderUpiId() != null ? request.getSenderUpiId() : senderAccount.getId().toString())
-                    + "|" + (request.getReceiverUpiId() != null ? request.getReceiverUpiId() : receiverAccount.getId().toString())
-                    + "|" + request.getAmount()
-                    + "|" + (nonce != null ? nonce : "")
-                    + "|" + timestamp;
+            String senderUpiStr = (request.getSenderUpiId() != null ? request.getSenderUpiId() : senderAccount.getId().toString());
+            String receiverUpiStr = (request.getReceiverUpiId() != null ? request.getReceiverUpiId() : receiverAccount.getId().toString());
+            String nonceStr = (nonce != null ? nonce : "");
+
+            String amountFormatted2Dec = String.format(java.util.Locale.US, "%.2f", request.getAmount());
+            String amountStandardDouble = String.valueOf(request.getAmount());
+            String amountIntegerStr = (request.getAmount() % 1 == 0) ? String.format(java.util.Locale.US, "%.0f", request.getAmount()) : amountStandardDouble;
+
+            String payloadData2Dec = senderUpiStr + "|" + receiverUpiStr + "|" + amountFormatted2Dec + "|" + nonceStr + "|" + timestamp;
+            String payloadDataDouble = senderUpiStr + "|" + receiverUpiStr + "|" + amountStandardDouble + "|" + nonceStr + "|" + timestamp;
+            String payloadDataInt = senderUpiStr + "|" + receiverUpiStr + "|" + amountIntegerStr + "|" + nonceStr + "|" + timestamp;
 
             boolean sigValid = false;
             try {
                 if (publicKeyToUse != null && !publicKeyToUse.isEmpty()) {
-                    sigValid = DigitalSignatureUtil.verifySignature(payloadData, request.getSignature(), publicKeyToUse);
+                    sigValid = DigitalSignatureUtil.verifySignature(payloadData2Dec, request.getSignature(), publicKeyToUse)
+                            || DigitalSignatureUtil.verifySignature(payloadDataInt, request.getSignature(), publicKeyToUse)
+                            || DigitalSignatureUtil.verifySignature(payloadDataDouble, request.getSignature(), publicKeyToUse);
                 }
             } catch (Exception e) {
                 sigValid = false;
