@@ -49,8 +49,8 @@ public class DigitalSignatureUtil {
 
     public static PublicKey getPublicKeyFromBase64(String base64PublicKey) throws Exception {
         String cleanKey = base64PublicKey
-                .replaceAll("-----\\BEGIN PUBLIC KEY-----", "")
-                .replaceAll("-----\\END PUBLIC KEY-----", "")
+                .replace("-----BEGIN PUBLIC KEY-----", "")
+                .replace("-----END PUBLIC KEY-----", "")
                 .replaceAll("\\s+", "");
 
         byte[] keyBytes = Base64.getDecoder().decode(cleanKey);

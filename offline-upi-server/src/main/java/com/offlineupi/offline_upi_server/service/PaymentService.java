@@ -143,6 +143,8 @@ public class PaymentService {
                             || DigitalSignatureUtil.verifySignature(payloadDataDouble, request.getSignature(), publicKeyToUse);
                 }
             } catch (Exception e) {
+                System.err.println(">>> Signature Verification Error: " + e.getMessage());
+                e.printStackTrace();
                 sigValid = false;
             }
 
